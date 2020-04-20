@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lucky.luckinstore.mapper.GoodsMapper">
+    <resultMap id="BaseResultMap" type="com.lucky.luckinstore.pojo.entity.Goods">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="goods_name" jdbcType="VARCHAR" property="goodsName"/>
+        <result column="price" jdbcType="DOUBLE" property="price"/>
+        <result column="image" jdbcType="VARCHAR" property="image"/>
+        <result column="creator" jdbcType="INTEGER" property="creator"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modifier" jdbcType="INTEGER" property="modifier"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="amount" jdbcType="INTEGER" property="amount"/>
+        <result column="label_id" javaType="INTEGER" property="labelId"/>
+    </resultMap>
+    <!-- 获取全部商品 -->
+    <select id="selectAllGoods" parameterType="Integer" resultType="com.lucky.luckinstore.pojo.ao.GoodsAO">
+        select * from t_goods where status = #{status}
+    </select>
+
+    <!--插入商品-->
+    <insert id="insertGoods" parameterType="com.lucky.luckinstore.pojo.dto.GoodsDTO">
+        insert into t_goods(goods_name, price, description, image, amount, label_id) values(#{goodsName}, #{price}, #{description}, #{image}, #{amount}, #{labelId})
+    </insert>
+
+    <!--修改商品信息-->
+    <update id="updateGoodsById" parameterType="com.lucky.luckinstore.pojo.dto.GoodsDTO">
+        update t_goods set
+            goods_name = #{goodsName},
+            price = #{price},
+            modifier = #{modifier},
+            description = #{description},
+            label_id = #{labelId},
+            amount = #{amount},
+            image = #{image}
+        where id = #{id}
+    </update>
+
+    <!--根据商品ID修改商品状态-->
+    <update id="updateGoodsStatusById" parameterType="com.lucky.luckinstore.pojo.dto.GoodsDTO">
+        update t_goods set status = #{status} where id = #{id}
+    </update>
+
+    <!--根据商品名搜索商品信息-->
+    <select id="selectGoodsByName" parameterType="String" resultType="com.lucky.luckinstore.pojo.dto.GoodsDTO">
+        select
+            t_goods.id,
+            t_goods.goods_name,
+            t_goods.price,
+            t_goods.image,
+            t_goods.description,
+            t_goods.amount,
+            t_goods.`status`,
+            t_label.label_name,
+            t_goods.hot
+        from
+            t_goods
+        inner join t_label on t_goods.label_id = t_label.id
+        where goods_name like concat('%', #{goodsName}, '%')
+        order by hot desc
+    </select>
+
+    <!--获取商品通过id-->
+    <select id="selectGoodsById" parameterType="Integer" resultType="com.lucky.luckinstore.pojo.dto.GoodsDTO">
+        select
+            id,
+            goods_name,
+            price,
+            image,
+            description,
+            amount
+        from t_goods
+        where id = #{id}
+    </select>
+
+    <!--根据商品的名字搜索商品-->
+    <select id="selectGoodsBySearchGoodsDTO" resultType="com.lucky.luckinstore.pojo.dto.GoodsDTO" parameterType="com.lucky.luckinstore.pojo.dto.SearchGoodsDTO">
+        select
+            id,
+            goods_name,
+            price,
+            image,
+            label_id
+        from
+            t_goods
+        <where>
+            goods_name like concat('%', #{goodsName}, '%')
+            <if test="status != null and status != '' or status == 0">
+                and status = #{status}
+            </if>
+            <if test="labelId != null and labelId != ''">
+                and label_id = #{labelId}
+            </if>
+            and status = 1
+        </where>
+        order by hot desc
+    </select>
+
+    <!--批量查询商品-->
+    <select id="selectGoodsListById" parameterType="java.util.ArrayList" resultType="com.lucky.luckinstore.pojo.dto.GoodsDTO">
+        select
+            id,
+            goods_name,
+            image,
+            price,
+            amount,
+            description
+        from
+            t_goods
+        where
+            id in
+        <foreach collection="list" index="index" item="goods" open="(" separator="," close=")">
+            #{goods.id}
+        </foreach>
+    </select>
+
+    <!--购买商品后数量减少-->
+    <update id="updateGoodsAmount" parameterType="com.lucky.luckinstore.pojo.dto.GoodsDTO">
+        update
+            t_goods
+        set
+            amount = #{amount}
+        where
+            id = #{id}
+    </update>
+
+    <!--更新商品热度-->
+    <update id="updateHotById" parameterType="com.lucky.luckinstore.pojo.dto.GoodsDTO">
+        update
+            t_goods
+        set
+            hot = hot + #{hot}
+        where
+            id = #{id}
+    </update>
+
+    <!--根据商品id获取商品id-->
+    <select id="selectLabelIdById" parameterType="Integer" resultType="Integer">
+        select label_id from t_goods where id = #{id}
+    </select>
+
+    <!--排重查询，将剩下商品查询出来-->
+    <select id="selectResidueGoodsById" resultType="com.lucky.luckinstore.pojo.dto.GoodsDTO">
+        select
+            id,
+            goods_name,
+            price,
+            image,
+            label_id
+        from
+            t_goods
+        where
+            status = 1 and id not in
+        <foreach collection="list" index="index" item="id" close=")" open="(" separator=",">
+            #{id}
+        </foreach>
+        <if test="list == null or list.size == 0">
+            (0)
+        </if>
+        order by hot desc
+    </select>
+    <!--取消订单后数量回滚-->
+    <update id="updateAmountByCancelOrder" parameterType="java.util.ArrayList">
+        <foreach collection="list" item="goods" index="index" separator=";">
+            update
+                t_goods
+            set
+                amount = amount + #{goods.num}
+            where
+                id = #{goods.id}
+        </foreach>
+    </update>
+
+    <!--批量查询商品-->
+    <select id="selectGoodsListByGoodsId" parameterType="java.util.ArrayList" resultType="com.lucky.luckinstore.pojo.dto.GoodsDTO">
+        select
+            id,
+            goods_name,
+            image,
+            price,
+            amount,
+            description
+        from
+            t_goods
+        where
+            id in
+        <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+</mapper>

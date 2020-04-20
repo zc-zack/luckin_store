@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lucky.luckinstore.mapper.OrderMapper">
+    <resultMap id="BaseResultMap" type="com.lucky.luckinstore.pojo.entity.Order">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="good_id" jdbcType="INTEGER" property="goodId"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="address_id" jdbcType="INTEGER" property="addressId"/>
+        <result column="order_time" jdbcType="TIMESTAMP" property="orderTime"/>
+        <result column="pay_time" jdbcType="TIMESTAMP" property="payTime"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="creator" jdbcType="INTEGER" property="creator"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modifier" jdbcType="INTEGER" property="modifier"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="tele" jdbcType="VARCHAR" property="tele"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="sex" jdbcType="TINYINT" property="sex"/>
+    </resultMap>
+    <resultMap id="orderMap" type="com.lucky.luckinstore.pojo.dto.OrderDTO">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="good_id" jdbcType="INTEGER" property="goodId"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="address_id" jdbcType="INTEGER" property="addressId"/>
+        <result column="order_time" jdbcType="TIMESTAMP" property="orderTime"/>
+        <result column="pay_time" jdbcType="TIMESTAMP" property="payTime"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="tele" jdbcType="VARCHAR" property="tele"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="sex" jdbcType="TINYINT" property="sex"/>
+        <result column="order_total" jdbcType="DOUBLE" property="orderTotal"/>
+        <result column="order_number" jdbcType="VARCHAR" property="orderNumber"/>
+        <result column="message" jdbcType="VARCHAR" property="message"/>
+        <collection property="goodsList" ofType="com.lucky.luckinstore.pojo.dto.GoodsDTO" javaType="java.util.List">
+            <result column="goods_id" jdbcType="INTEGER" property="id" />
+            <result column="price" jdbcType="DOUBLE" property="price" />
+            <result column="total" jdbcType="DOUBLE" property="total" />
+            <result column="num" jdbcType="INTEGER" property="num" />
+            <result column="goods_name" jdbcType="VARCHAR" property="goodsName" />
+            <result column="image" jdbcType="VARCHAR" property="image" />
+        </collection>
+    </resultMap>
+
+    <!--查询所有订单-->
+    <select id="selectAllOrder" resultType="com.lucky.luckinstore.pojo.ao.OrderAO">
+        select
+            t_order.pay_time,
+            t_order.order_time,
+            t_user.username,
+            t_order.tele,
+            t_order.address,
+            t_order.sex,
+            t_goods.goods_name,
+            t_goods.price,
+            t_order.id
+        from
+            t_order
+        inner join t_user on t_order.user_id = t_user.id
+        inner join t_goods on t_order.goods_id = t_goods.id
+        where statu != -1
+    </select>
+    <!--通过手机号查询订单-->
+    <select id="selectOrderByTele" parameterType="com.lucky.luckinstore.pojo.dto.SearchOrderDTO" resultType="com.lucky.luckinstore.pojo.dto.OrderAdminDTO">
+        select
+            t_order.id,
+            t_order.tele,
+            t_order.address,
+            t_order.sex,
+            t_order.message,
+            t_order.receive_name,
+            t_order.order_time,
+            t_order.pay_time,
+            t_order_goods.goods_id,
+            t_order_goods.price,
+            t_order_goods.goods_name,
+            t_order_goods.num,
+            t_order_goods.total,
+            t_order.order_total,
+            t_order.status,
+            t_order.order_number
+        from
+            t_order
+        inner join t_order_goods on t_order_goods.order_id = t_order.id
+        <where>
+            t_order.tele like concat('%', #{tele}, '%')
+            <if test="status != null and status != '' or status == 0">
+                and t_order.status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <!--通过订单状态和手机号返回不同的订单-->
+    <select id="selectOrderByStatusAndTele" parameterType="com.lucky.luckinstore.pojo.dto.SearchOrderDTO" resultType="com.lucky.luckinstore.pojo.dto.OrderDTO">
+       select
+            t_order.pay_time,
+            t_order.order_time,
+            t_user.username,
+            t_order.tele,
+            t_order.address,
+            t_order.sex,
+            t_goods.goods_name,
+            t_goods.price,
+            t_order.id,
+            t_order.order_number
+        from
+            t_order
+        inner join t_user on t_order.user_id = t_user.id
+        inner join t_goods on t_order.goods_id = t_goods.id
+        where t_order.status = #{status} and t_order.tele like concat('%',#{tele},'%')
+    </select>
+
+    <!--修改收货订单信息-->
+    <update id="updateOrderByOrderId" parameterType="com.lucky.luckinstore.pojo.dto.OrderDTO">
+        update t_order set tele = #{tele}, address = #{address}, modifier = #{modifier} where id = #{id}
+    </update>
+
+    <!--创建新的订单-->
+    <insert id="insertOrder" parameterType="com.lucky.luckinstore.pojo.dto.OrderDTO" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into
+            t_order(user_id, address_id, order_time, creator, create_time, modifier, modify_time, tele, address,
+             sex, message, receive_name, order_total, order_number)
+        values
+            (#{userId}, #{addressId}, now(), #{userId}, now(), #{userId}, now(), #{tele}, #{address},
+            #{sex}, #{message},  #{receiveName}, #{orderTotal}, #{orderNumber})
+    </insert>
+
+    <!--根据订单号修改订单状态-->
+    <update id="updateOrderStatusById">
+        update t_order set status = #{status} where id = #{orderId}
+    </update>
+
+    <!--根据用户id获取所有商品-->
+    <select id="selectOrderByUserId" parameterType="Integer" resultMap="orderMap">
+         select
+            t_order_goods.goods_id,
+            t_order_goods.price,
+            t_order_goods.total,
+            t_order.id,
+            t_order.tele,
+            t_order.address,
+            t_order.sex,
+            t_order.message,
+            t_order.receive_name,
+            t_order.order_total,
+            t_order.`status`,
+            t_order_goods.num,
+            t_order_goods.image,
+            t_order_goods.goods_name,
+            t_order.order_number
+        from
+            t_order_goods
+        inner join t_order on t_order.id = t_order_goods.order_id
+        where t_order.user_id = #{userId}
+    </select>
+
+    <!--获取订单价钱-->
+    <select id="selectPriceById" parameterType="Integer" resultType="Double">
+        select order_total from t_order where id = #{orderId}
+    </select>
+    <!--根据订单id获取订单-->
+    <select id="selectOrderById" parameterType="Integer" resultMap="orderMap">
+        select
+            t_order_goods.goods_id,
+            t_order_goods.price,
+            t_order_goods.total,
+            t_order.id,
+            t_order.tele,
+            t_order.address,
+            t_order.sex,
+            t_order.message,
+            t_order.receive_name,
+            t_order.order_total,
+            t_order.`status`,
+            t_order_goods.num,
+            t_order_goods.image,
+            t_order.order_number,
+            t_order_goods.goods_name,
+            t_order.order_number
+        from
+            t_order_goods
+        inner join t_order on t_order.id = t_order_goods.order_id
+        where t_order.id = #{orderId}
+    </select>
+    <!--用户付款时的状态修改和付款时间-->
+    <update id="updateStatusByPay" parameterType="com.lucky.luckinstore.pojo.dto.PayDTO">
+        update t_order
+        set
+            status = #{status},
+            pay_time = now(),
+            modifier = #{userId},
+            modify_time = now()
+        where id = #{orderId}
+    </update>
+</mapper>

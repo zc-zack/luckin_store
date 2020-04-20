@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lucky.luckinstore.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.lucky.luckinstore.pojo.entity.User">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="role" jdbcType="INTEGER" property="role"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="member_id" jdbcType="INTEGER" property="memberId"/>
+        <result column="creator" jdbcType="INTEGER" property="creator"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modifier" jdbcType="INTEGER" property="modifier"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="score" jdbcType="TIMESTAMP" property="score"/>
+        <result column="tele" jdbcType="VARCHAR" property="tele"/>
+        <result column="sex" jdbcType="TINYINT" property="sex"/>
+    </resultMap>
+    <!--获取用户信息进行相关验证-->
+    <select id="selectUserByUsername" parameterType="String" resultType="com.lucky.luckinstore.pojo.dto.UserDTO">
+        select
+            id,
+            password,
+            status,
+            role
+        from
+            t_user
+        where
+            username = #{username}
+    </select>
+
+    <!--获取所用用户根据电话-->
+    <select id="selectAllUserByTele" parameterType="String" resultType="com.lucky.luckinstore.pojo.dto.UserDTO">
+        select
+            t_user.id,
+            t_user.username,
+            t_user.role,
+            t_user.status,
+            t_score.present_score as score,
+            t_user.tele,
+            t_user.sex,
+            t_member.member_name
+        from
+            t_user
+        inner join t_member on t_user.member_id = t_member.id
+        inner join t_score on t_user.score_id = t_score.id
+        where tele like concat('%', #{tele}, '%')
+    </select>
+
+    <!--获取所有的用户名-->
+    <select id="selectAllUsername" resultType="String">
+        select username from t_user
+    </select>
+
+    <!--插入新的用户-->
+    <insert id="insertUser" parameterType="com.lucky.luckinstore.pojo.dto.UserDTO" useGeneratedKeys="true" keyProperty="id">
+        insert into t_user(username, password, tele, sex) values(#{username}, #{password}, #{tele}, #{sex})
+    </insert>
+
+    <!--用户注册时更新创建者和修改者信息-->
+    <update id="updateRegister" parameterType="com.lucky.luckinstore.pojo.dto.UserDTO">
+        update t_user set score_id = #{scoreId}, creator = #{id}, modifier = #{id}, create_time = now(), modify_time = now() where id = #{id}
+    </update>
+
+    <!--后台管理所获取的所有用户-->
+    <select id="selectAllMemberByStatus" resultType="com.lucky.luckinstore.pojo.dto.MemberDTO" parameterType="Integer">
+        SELECT
+            t_member.member_name,
+            t_user.username,
+            t_user.role,
+            t_user.id
+        FROM
+            t_member
+        INNER JOIN t_user ON t_member.id = t_user.member_id
+        WHERE t_user.status = #{status}
+    </select>
+
+    <!--根据用户id修改密码-->
+    <update id="updatePasswordByUserId" parameterType="com.lucky.luckinstore.pojo.dto.PasswordDTO">
+        update t_user set password = #{password} where id = #{userId}
+    </update>
+
+    <!--通过用户id修改用户状态-->
+    <update id="updateUserStatusById" parameterType="com.lucky.luckinstore.pojo.dto.UserDTO">
+        update t_user set status = #{status} where id = #{id}
+    </update>
+
+    <!--通过用户名获取用户id-->
+    <select id="selectUserIdByUsername" parameterType="String" resultType="Integer">
+        select id from t_user where username = #{username}
+    </select>
+
+    <!--获取用户信息通过用户id-->
+    <select id="selectUserById" parameterType="Integer" resultType="com.lucky.luckinstore.pojo.dto.UserDTO">
+        select
+            t_user.username,
+            t_user.tele,
+            t_user.sex,
+            t_user.id,
+            t_user.portrait,
+            t_member.member_name,
+            t_score.present_score as score
+        from
+            t_user
+        inner join t_score on t_user.score_id = t_score.id
+        inner join t_member on t_user.member_id = t_member.id
+        where t_user.id = #{userId}
+    </select>
+
+    <!--更新用户信息-->
+    <update id="updateUserById" parameterType="com.lucky.luckinstore.pojo.dto.UserDTO">
+        update t_user set tele = #{tele}, sex = #{sex} where id = #{id}
+    </update>
+    <!--更新用户头像-->
+    <update id="updatePortraitById" parameterType="com.lucky.luckinstore.pojo.dto.UserPortraitDTO">
+        update t_user set portrait = #{portrait} where id = #{id}
+    </update>
+</mapper>

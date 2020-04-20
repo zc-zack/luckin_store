@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <title>订单列表</title>
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/webjars/layui/2.5.4/css/layui.css"  media="all">
+    <link href="/css/main.css" type="text/css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+<div class="site-nav-bg">
+    <div class="site-nav w1200">
+        <p class="sn-back-home">
+            <i class="layui-icon layui-icon-home"></i>
+            <a href="/user/home">首页</a>
+        </p>
+        <div class="sn-quick-menu">
+            <div class="login">
+                <a th:href="@{/login}" th:text="登录" th:if="${user.id==null}" class="text-right"></a>
+                <a th:href="@{/user/information}" th:text="${user.username}" th:if="${user.id!=null}"></a>
+            </div>
+            <div class="sp-cart"><a href="/user/myOrder" class="text-right">我的订单</a></div>
+            <div class="sp-cart" style="margin-left: 10px"><a href="/user/shoppingCart">购物车</a><span></span></div>
+            <div class="sp-cart"><a href="/logOut" class="text-right" th:if="${user.id!=null}">退出登录</a></div>
+        </div>
+    </div>
+</div>
+<!--最外层的布局容器-->
+<div>
+    <div class="container" style="margin-top: 20px; ">
+    <div class="row" style="padding-top: 10px; padding-bottom: 20px">
+        <div class="col-md-12" >
+            <div class="row">
+                <div class="layui-tab">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">未付款</li>
+                        <li>已付款</li>
+                        <li>已评价</li>
+                    </ul>
+                    <div class="layui-tab-content" style="background-color: #f2f2f2">
+                        <div class="layui-tab-item layui-show">
+                            <div class="layui-card">
+                                <div class="layui-card-body">
+                                    <div class="panel panel-default" th:each="order: ${orderList}" th:if="${order.status == 0}">
+                                        <div class="layui-collapse" >
+                                            <div class="layui-colla-item">
+                                                <h2 class="layui-colla-title" th:text=" '订单号：' + ${order.orderNumber}"></h2>
+                                                <div class="layui-colla-content layui-show">
+                                                    <table class="layui-table">
+                                                        <tbody>
+                                                        <tr>
+                                                            <td>
+                                                                <table class="layui-table" lay-skin="line">
+                                                                    <tbody>
+                                                                    <tr th:each="goods: ${order.goodsList}">
+                                                                        <td>
+                                                                            <div style="float: left">
+                                                                                <img th:src="${goods.image}" class="img-rounded" style="vertical-align: middle;">
+                                                                            </div>
+                                                                            <div style="float: left; margin-left: 20px">
+                                                                                <h4 th:text="${goods.goodsName}" style="display: inline-block; vertical-align: middle;"></h4>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td th:text="${goods.price}"></td>
+                                                                        <td th:text="'x' + ${goods.num}"></td>
+                                                                        <td th:text="${goods.total}"></td>
+                                                                    </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                            <td th:text="${order.orderTotal}" style="color: red"></td>
+                                                            <td>
+                                                                <button class="layui-btn layui-btn-warm"
+                                                                        th:onclick="|pay('${order.id}')|"
+                                                                        th:if="${order.status==0}">付款</button>
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item">
+                            <div class="layui-card">
+                                <div class="layui-card-body">
+                                    <div class="panel panel-default" th:each="order: ${orderList}"  th:if="${order.status == 1}">
+                                        <div class="layui-collapse">
+                                            <div class="layui-colla-item">
+                                                <h2 class="layui-colla-title" th:text=" '订单号：' + ${order.orderNumber}"></h2>
+                                                <div class="layui-colla-content layui-show">
+                                                    <table class="layui-table">
+                                                        <tbody>
+                                                        <tr>
+                                                            <td>
+                                                                <table class="layui-table" lay-skin="line">
+                                                                    <tbody>
+                                                                    <tr th:each="goods: ${order.goodsList}">
+                                                                        <td>
+                                                                            <div style="float: left">
+                                                                                <img th:src="${goods.image}" class="img-rounded" style="vertical-align: middle;">
+                                                                            </div>
+                                                                            <div style="float: left; margin-left: 20px">
+                                                                                <h4 th:text="${goods.goodsName}" style="display: inline-block; vertical-align: middle;"></h4>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td th:text="${goods.price}"></td>
+                                                                        <td th:text="'x' + ${goods.num}"></td>
+                                                                        <td th:text="${goods.total}"></td>
+                                                                    </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                            <td th:text="${order.orderTotal}" style="color: red"></td>
+                                                            <td>
+                                                                <button class="layui-btn layui-btn-primary"
+                                                                        th:onclick="|comment('${order.id}')|"
+                                                                        th:if="${order.status==1}">评价</button>
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item">
+                            <div class="layui-card">
+                                <div class="layui-card-body">
+                                    <div class="panel panel-default" th:each="order: ${orderList}" th:if="${order.status == 2}">
+                                        <div class="layui-collapse">
+                                            <div class="layui-colla-item">
+                                                <h2 class="layui-colla-title" th:text=" '订单号：' + ${order.orderNumber}"></h2>
+                                                <div class="layui-colla-content layui-show">
+                                                    <table class="layui-table">
+                                                        <tbody>
+                                                        <tr>
+                                                            <td>
+                                                                <table class="layui-table" lay-skin="line">
+                                                                    <tbody>
+                                                                    <tr th:each="goods: ${order.goodsList}">
+                                                                        <td>
+                                                                            <div style="float: left">
+                                                                                <img th:src="${goods.image}" class="img-rounded" style="vertical-align: middle;">
+                                                                            </div>
+                                                                            <div style="float: left; margin-left: 20px">
+                                                                                <h4 th:text="${goods.goodsName}" style="display: inline-block; vertical-align: middle;"></h4>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td th:text="${goods.price}"></td>
+                                                                        <td th:text="'x' + ${goods.num}"></td>
+                                                                        <td th:text="${goods.total}"></td>
+                                                                    </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                            <td th:text="${order.orderTotal}" style="color: red"></td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<div id="commentBox" style="display: none">
+    <form class="layui-form" action="">
+        <div class="layui-form-item" hidden>
+            <label class="layui-form-label">订单id</label>
+            <div class="layui-input-inline">
+                <input autocomplete="off" class="layui-input" lay-verify="required" id="orderId" name="orderId"
+                       required type="text">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">评价内容</label>
+            <div class="layui-input-inline">
+                <textarea class="layui-textarea" name="content" placeholder="请输入评价内容"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-filter="formDemo" lay-submit>提交</button>
+                <button class="layui-btn layui-btn-primary" type="reset">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+
+<script src="/webjars/layui/2.5.4/layui.js"></script>
+<script th:inline="javascript">
+    function pay(orderId){
+        window.location.href="/user/pay?orderId="+orderId;
+        console.log(orderId);
+
+    }
+    function comment(orderId){
+        $('#orderId').val(orderId);
+        layui.use('layer', function() {
+            var layer = layui.layer;
+            var index = layer.open({
+                type: 1,
+                content: $('#commentBox') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+            });
+            layui.use('form', function(){
+                var form = layui.form;
+                //监听提交
+                form.on('submit(formDemo)', function(data){
+                    // var jsonData = JSON.parse(data.field);
+                    $.ajax({
+                        url: "/comment/addComment",
+                        type: "post",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(data.field),
+                        success: function (result) {
+                            if(result.data > 0){
+                                layer.msg("评价成功！");
+                                layer.close(index);
+                                location.reload();
+                            }
+                        }
+                    });
+                    return false;
+                });
+            });
+        });
+    }
+    layui.use('form', function(){
+        var form = layui.form;
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            console.log(JSON.stringify(data.field));
+            $.ajax({
+                url: "/user/updateUser",
+                type: "post",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(data.field),
+                success: function (result) {
+                    if(result == 1){
+                        layer.msg("修改个人信息成功！");
+                        setTimeout("window.location.href='/user/information'", 1000);
+                    }else {
+                        layer.msg("修改个人信息失败！");
+                    }
+                }
+            });
+            return false;
+        });
+    });
+    //注意：折叠面板 依赖 element 模块，否则无法进行功能性操作
+    layui.use('element', function(){
+        var element = layui.element;
+
+    });
+
+
+</script>
+</html>

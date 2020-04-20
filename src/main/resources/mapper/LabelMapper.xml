@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lucky.luckinstore.mapper.LabelMapper">
+    <resultMap id="BaseResultMap" type="com.lucky.luckinstore.pojo.entity.Label">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="label_name" jdbcType="VARCHAR" property="labelName"/>
+        <result column="deleted" jdbcType="BIT" property="deleted"/>
+        <result column="creator" jdbcType="INTEGER" property="creator"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modifier" jdbcType="INTEGER" property="modifier"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+    </resultMap>
+
+    <!--查询所有标签分类-->
+    <select id="selectAllLabelByDeleted" parameterType="Boolean" resultMap="BaseResultMap">
+        select
+            label_name,
+            id
+        from
+            t_label
+        where
+            deleted = #{deleted}
+    </select>
+
+    <!--插入新的标签-->
+    <insert id="insertLabel" parameterType="Label">
+        insert into t_label(label_name, creator, modifier) values(#{labelName}, #{creator}, #{modifier})
+    </insert>
+
+    <select id="selectLabelById" parameterType="Integer" resultType="String">
+        select label_name from t_label where id = #{labelId}
+    </select>
+
+    <select id="selectNameAndId" resultType="com.lucky.luckinstore.pojo.dto.LabelDTO">
+        select
+            id,
+            label_name
+        from
+            t_label
+    </select>
+
+    <!--通过标签id修改标签名-->
+    <update id="updateLabelNameById" parameterType="com.lucky.luckinstore.pojo.dto.LabelDTO">
+        update
+            t_label
+        set
+            label_name = #{labelName},
+            modifier = #{modifier},
+            modify_time = now()
+        where
+            id = #{id}
+    </update>
+</mapper>

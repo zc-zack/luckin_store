@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <title>订单详情页</title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/main.css" type="text/css" rel="stylesheet">
+    <link href="/webjars/layui/2.5.4/css/layui.css" rel="stylesheet">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/webjars/layui/2.5.4/layui.all.js"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+</head>
+
+<body>
+<div class="site-nav-bg">
+    <div class="site-nav w1200">
+        <p class="sn-back-home">
+            <i class="layui-icon layui-icon-home"></i>
+            <a href="/user/home">首页</a>
+        </p>
+        <div class="sn-quick-menu">
+            <div class="login">
+                <a th:href="@{/login}" th:text="登录" th:if="${user.id==null}" class="text-right"></a>
+                <a th:href="@{/user/information}" th:text="${user.username}" th:if="${user.id!=null}"></a>
+            </div>
+            <div class="sp-cart"><a href="/user/myOrder" class="text-right">我的订单</a></div>
+            <div class="sp-cart" style="margin-left: 10px"><a href="/user/shoppingCart">购物车</a><span></span></div>
+            <div class="sp-cart"><a href="/logOut" class="text-right" th:if="${user.id!=null}">退出登录</a></div>
+        </div>
+    </div>
+</div>
+<!--最外层的布局容器-->
+<div class="container" style="margin-top: 20px">
+    <!--导航栏部分-->
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/user/home">首页</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li th:each="label: ${labelList}">
+                        <a th:href="@{/user/home(labelId=${label.id})}" th:text="${label.labelName}"> <span class="sr-only">(current)</span></a>
+                    </li>
+                </ul>
+                <form class="navbar-form navbar-right" role="search" action="/user/home" method="get">
+                    <input name="labelId" th:value="${param.labelId}" hidden  th:if="${param.labelId != null}">
+                </form>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+    <div class="row">
+        <div class="content content-nav-base datails-content" style="padding-bottom: 20">
+            <div class="data-cont-wrap w1200">
+                <div class="product-intro layui-clear">
+                    <form class="layui-form" action="">
+                        <input id="goodsId" name="goodsId" type="text" th:value="${goods.id}" hidden>
+                        <div class="preview-wrap" style="" align="center">
+                           <img th:src="${goods.image}" style="width: 60%; height: auto;">
+                        </div>
+                        <div class="itemInfo-wrap">
+                            <div class="itemInfo" style="width: 80%">
+                                <div class="title">
+                                    <h4 th:text="${goods.goodsName}"></h4>
+                                </div>
+                                <span th:text="${goods.description}"></span>
+                                <div class="summary">
+                                    <p class="activity"><span>价格:</span><strong class="price" th:text="'￥' + ${goods.price}"><i></i></strong></p>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="input-group col-md-2" style="float: left" >
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button" id="minus">-</button>
+                                            </span>
+                                            <input type="text" class="form-control" value="1" id="num" name="num">
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button" id="add">+</button>
+                                            </span>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <span th:text="'剩余数量：'+${goods.amount}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 10px; margin-left: 1px">
+                                    <button type="submit" id="buy" class="btn btn-primary" lay-submit lay-filter="orderButton">立即购买</button>
+                                    <button type="button" class="btn btn-warning" lay-submit lay-filter="formDemo">加入购物车</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" >
+        <div class="col-md-12">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+                <div class="layui-tab">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">商品评价</li>
+                    </ul>
+                    <div class="layui-tab-content" style="background-color: #f2f2f2">
+                        <div class="layui-tab-item layui-show">
+                            <div class="layui-card" th:each="comment: ${commentList}">
+                                <div class="layui-card-header">
+                                    <p th:text="${comment.username} + '   ' +  ${#dates.format(comment.commentTime, 'yyyy-MM-dd')}">
+                                    </p>
+
+                                </div>
+                                <div class="layui-card-body" th:text="${comment.content}">
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+</div>
+
+
+</body>
+<script>
+    $('#minus').click(function () {
+        var num = $('#num');
+        var count = Number(num.val());
+        if(count > 0){
+            num.val(count - 1);
+        }
+    });
+    $('#add').click(function () {
+        var num = $('#num');
+        var count = Number(num.val());
+        num.val(count + 1);
+    });
+</script>
+<script>
+    layui.use('form', function(){
+        var form = layui.form;
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            console.log(123);
+            $.ajax({
+                url: "/shoppingCart/add",
+                type: "post",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(data.field),
+                success: function (result) {
+                    if(result.data == 1){
+                        layer.msg("添加购物车成功！");
+                    }
+                }
+            });
+            return false;
+        });
+
+        //监听提交
+        form.on('submit(orderButton)', function(data){
+            var jsonData = [{
+                goodsId:  data.field.goodsId,
+                num: data.field.num
+            }];
+            console.log(jsonData);
+            $.ajax({
+                url: "/shoppingCart/addOrder",
+                type: "post",
+                async: false,
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(jsonData),
+                success:function (result) {
+                    if(result.data == 1){
+                        window.location = "/user/order";
+                    }
+                }
+            });
+            return false;
+        });
+    });
+</script>
+<style>
+    .datails-content {
+         padding-bottom: 0;
+    }
+</style>
+</html>

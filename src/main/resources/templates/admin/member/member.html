@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+    <title>后台管理系统</title>
+    <link href="/webjars/layui/2.5.4/css/layui.css" rel="stylesheet">
+    <script src="/webjars/jquery/3.4.1/dist/jquery.min.js"></script>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">luckinstore后台管理系统</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img class="layui-nav-img" src="http://t.cn/RCzsdCq">
+                    admin
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">基本资料</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="/logOut">退了</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <!--商品管理-->
+                <li class="layui-nav-item">
+                    <a class="">商品</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/goods">所有商品</a></dd>
+                        <dd><a href="/admin/label">管理标签</a></dd>
+                    </dl>
+                </li>
+                <!--会员管理-->
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a class="">会员</a>
+                    <dl class="layui-nav-child">
+                        <dd class="layui-this"><a href="/admin/member">所有会员</a></dd>
+                    </dl>
+                </li>
+                <!--订单管理-->
+                <li class="layui-nav-item">
+                    <a class="">订单</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/order">所有订单</a></dd>
+                        <dd><a href="/admin/unfinishedOrder">未完成订单</a></dd>
+                        <dd><a href="/admin/finishedOrder">已完成订单</a></dd>
+                    </dl>
+                </li>
+                <!--积分管理-->
+                <li class="layui-nav-item">
+                    <a class="">积分</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/score">用户积分情况</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body" style="background-color: #f2f2f2">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <div class="layui-card">
+                <div class="layui-card-header">用户列表</div>
+                <div class="layui-card-body">
+                    <div class="demoTable">
+                        搜索用户：
+                        <div class="layui-inline">
+                            <input class="layui-input" name="tele" id="demoReload" autocomplete="off">
+                        </div>
+                        <button class="layui-btn" data-type="reload">搜索</button>
+                    </div>
+                    <table class="layui-hide" id="member" lay-filter="member"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © luckinstore
+    </div>
+</div>
+<script id="barDemo" type="text/html">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="reset">重置密码</a>
+</script>
+<script id="userStatus" type="text/html">
+    {{#  if(d.status == 1){ }}
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="del">正常</a>
+    {{#  } else { }}
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="off">封禁</a>
+    {{#  }}}
+</script>
+<script src="/webjars/layui/2.5.4/layui.all.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use('element', function () {
+        var element = layui.element;
+
+    });
+
+    layui.use('table', function () {
+        var table = layui.table;
+        table.render({
+            elem: '#member'
+            , url: '/getAllMember'
+            , cols: [
+                [
+                    {field: 'username', width: '10%', title: '用户名', align: 'center'}
+                    ,{field: 'tele', width: '15%', title: '电话', align: 'center'}
+                    ,{field: 'sex', width: '10%', title: '性别', templet: '<div>{{ d.sex ? \'男\' : \'女\' }}</div>', align: 'center'}
+                    ,{field: 'memberName', width: '15%', title: '会员等级', align: 'center'}
+                    ,{field: 'roleName', width: '15%', title: '用户等级', align: 'center'}
+                    ,{field: 'score', width: '10%', title: '用户积分', align: 'center'}
+                    ,{fixed: 'right', width: '10%', title: '用户状态', toolbar: '#userStatus', align: 'center', templet: '<div>{{ d.status == 1 ? \'正常\' : \'封禁\' }}</div>'}
+                    ,{fixed: 'right', title:'操作', toolbar: '#barDemo', width:'15%', align: 'center'}
+                ]
+            ]
+            , page: true
+            , where: {
+                tele: ""
+            }
+            ,id: 'userTable'
+        });
+        var $ = layui.$, active = {
+            reload: function(){
+                var demoReload = $('#demoReload');
+                //执行重载
+                table.reload('userTable', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        tele: demoReload.val()
+                    }
+                }, 'data');
+            }
+        };
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+        //监听行工具事件
+        table.on('tool(member)', function(obj){
+            var data = obj.data;
+            console.log(data);
+            //console.log(obj)
+            if(obj.event === 'del'){
+                var user = {
+                    id: data.id,
+                    status: 0
+                };
+                layer.confirm('封禁此用户？', function(index){
+                    $.ajax({
+                        url: "/admin/alterUserStatus",
+                        type: "post",
+                        data: JSON.stringify(user),
+                        contentType: "application/json;charset=utf-8",
+                        success: function (result) {
+                            layer.msg("封禁成功");
+                            table.reload('userTable');
+                        }
+                    });
+                    layer.close(index);
+                });
+            } else if(obj.event === 'off'){
+                var user = {
+                    id: data.id,
+                    status: 1
+                };
+                layer.confirm('解封此用户？', function(index){
+                    $.ajax({
+                        url: "/admin/alterUserStatus",
+                        type: "post",
+                        data: JSON.stringify(user),
+                        contentType: "application/json;charset=utf-8",
+                        success: function (result) {
+                            layer.msg("解封成功");
+                            table.reload('userTable');
+                        }
+                    });
+                    layer.close(index);
+                });
+            } else if(obj.event === 'reset'){
+                var id = data.id;
+                var data = {userId: data.id,
+                            password: "123"};
+                console.log(id);
+                layer.confirm('真的要重置密码吗', function(index){
+                    console.log(id);
+                    // var id = {id: data.id};
+                    $.ajax({
+                        url: "/resetPassword",
+                        type: "post",
+                        contentType: "application/json;charset=utf-8",
+                        data: JSON.stringify(data),
+                        success: function (result) {
+                            if(result.data == 1){
+                                layer.msg("重置密码成功");
+                            }
+                        }
+                    });
+                    layer.close(index);
+                });
+            }
+        });
+    });
+
+    //前端格式化日期的方法
+    function Format(datetime, fmt) {
+        if (parseInt(datetime) == datetime) {
+            if (datetime.length == 10) {
+                datetime = parseInt(datetime) * 1000;
+            } else if (datetime.length == 13) {
+                datetime = parseInt(datetime);
+            }
+        }
+        datetime = new Date(datetime);
+        var o = {
+            "M+": datetime.getMonth() + 1,                 //月份
+            "d+": datetime.getDate(),                    //日
+            "h+": datetime.getHours(),                   //小时
+            "m+": datetime.getMinutes(),                 //分
+            "s+": datetime.getSeconds(),                 //秒
+            "q+": Math.floor((datetime.getMonth() + 3) / 3), //季度
+            "S": datetime.getMilliseconds()             //毫秒
+        };
+        if (/(y+)/.test(fmt))
+            fmt = fmt.replace(RegExp.$1, (datetime.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt))
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lucky.luckinstore.mapper.BehaviorMapper">
+    <resultMap id="BaseResultMap" type="com.lucky.luckinstore.pojo.entity.Behavior">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="label_id" jdbcType="INTEGER" property="labelId"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modifier" jdbcType="INTEGER" property="modifier"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+    </resultMap>
+
+    <!--插入新的行为-->
+    <insert id="insertBehavior" parameterType="com.lucky.luckinstore.pojo.dto.BehaviorDTO">
+        insert into
+            t_behavior(user_id, label_id, behavior, creator, create_time)
+        values
+            (#{userId}, #{labelId}, #{behavior}, #{userId}, now())
+    </insert>
+
+    <!--查询数据库中是否有这个行为的记录-->
+    <select id="selectIdByUserIdAndLabelId" parameterType="com.lucky.luckinstore.pojo.dto.BehaviorDTO" resultType="Integer">
+        select
+            id
+        from
+            t_behavior
+        where
+            user_id = #{userId} and label_id = #{labelId}
+    </select>
+
+    <!--更新用户的行为权重-->
+    <update id="updateBehaviorById" parameterType="com.lucky.luckinstore.pojo.dto.BehaviorDTO">
+        update
+            t_behavior
+        set
+            behavior = behavior + #{behavior}
+        where
+            id = #{id}
+    </update>
+    <!--查询用户行为里的labelId-->
+    <select id="selectLabelIdByUserId" parameterType="Integer" resultType="Integer">
+        select
+            label_id
+        from
+            t_behavior
+        where
+            user_id = #{userId} order by behavior desc
+    </select>
+</mapper>

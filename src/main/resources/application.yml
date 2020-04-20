@@ -1,0 +1,37 @@
+service:
+  port: 8080
+
+spring:
+  datasource:
+    name: lucky_store
+    url: jdbc:mysql://139.224.115.237:3306/lucky_store?characterEncoding=utf-8&serverTimezone=UTC
+    username: root
+    password: zhangC1997
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+
+  thymeleaf:
+    cache: false
+
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.lucky.luckinstore.pojo.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+# 七牛云配置
+# bucket是创建的存储空间名
+# path对应存储空间的访问域名
+qiniu:
+  accessKey: jmfccEnDXHxJHqRmL5KuRp88b0RBeNWa3lnFDrA6
+  secretKey: 7DzcWSFmIpUQBt_2uJe2ldeOBwYdf6fWXSM1Mgtg
+  bucket: zc-image1997
+  path: http://pyf0knr2h.bkt.clouddn.com
+
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countsql
+

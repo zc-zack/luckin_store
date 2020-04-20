@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+    <title>后台管理系统</title>
+    <link href="/webjars/layui/2.5.4/css/layui.css" rel="stylesheet">
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">luckinstore后台管理系统</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img class="layui-nav-img" src="http://t.cn/RCzsdCq">
+                    admin
+                </a>
+            </li>
+            <li class="layui-nav-item"><a href="/logOut">退了</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <!--商品管理-->
+                <li class="layui-nav-item">
+                    <a class="">商品</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/goods">所有商品</a></dd>
+                        <dd><a href="/admin/label">管理标签</a></dd>
+                    </dl>
+                </li>
+                <!--会员管理-->
+                <li class="layui-nav-item">
+                    <a class="">会员</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/member">所有会员</a></dd>
+                    </dl>
+                </li>
+                <!--订单管理-->
+                <li class="layui-nav-item">
+                    <a class="">订单</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/order">所有订单</a></dd>
+                        <dd><a href="/admin/unfinishedOrder">未完成订单</a></dd>
+                        <dd><a href="/admin/finishedOrder">已完成订单</a></dd>
+                    </dl>
+                </li>
+                <!--积分管理-->
+                <li class="layui-nav-item">
+                    <a class="">积分</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/score">用户积分情况</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px; vertical-align:center; text-align: center;">
+            <img src="/img/home.png" style="vertical-align: middle">
+        </div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © layui.com - 底部固定区域
+    </div>
+</div>
+<script src="/webjars/layui/2.5.4/layui.all.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use('element', function () {
+        var element = layui.element;
+
+    });
+</script>
+</body>
+</html>

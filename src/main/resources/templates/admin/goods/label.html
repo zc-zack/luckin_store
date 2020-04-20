@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+    <title>后台管理系统</title>
+    <script src="/webjars/jquery/3.4.1/dist/jquery.min.js"></script>
+    <script src="/webjars/layui/2.5.4/layui.js" charset="UTF-8"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="/webjars/layui/2.5.4/css/layui.css" rel="stylesheet">
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">luckinstore后台管理系统</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img class="layui-nav-img" src="http://t.cn/RCzsdCq">
+                    admin
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">基本资料</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="/logOut">退了</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <!--商品管理-->
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a class="">商品</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/goods">所有商品</a></dd>
+                        <dd class="layui-this"><a href="/admin/label">管理标签</a></dd>
+                    </dl>
+                </li>
+                <!--会员管理-->
+                <li class="layui-nav-item">
+                    <a class="">会员</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/member">所有会员</a></dd>
+<!--                        <dd><a href="/admin/deletedGoods">已注销会员</a></dd>-->
+<!--                        <dd><a href="javascript:;">已封禁会员</a></dd>-->
+                    </dl>
+                </li>
+                <!--订单管理-->
+                <li class="layui-nav-item">
+                    <a class="">订单</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/order">所有订单</a></dd>
+                        <dd><a href="/admin/unfinishedOrder">未完成订单</a></dd>
+                        <dd><a href="/admin/finishedOrder">已完成订单</a></dd>
+                    </dl>
+                </li>
+                <!--积分管理-->
+                <li class="layui-nav-item">
+                    <a class="">积分</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/score">用户积分情况</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body" style="background-color: #f2f2f2">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <div class="layui-card">
+                <div class="layui-card-header">标签列表</div>
+                <div class="layui-card-body">
+                    <table class="layui-hide" id="label" lay-filter="label"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="labelBox" style="display: none">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">标签名</label>
+                <div class="layui-input-inline">
+                    <input autocomplete="off" class="layui-input" lay-verify="required" id="labelName" name="labelName" placeholder="请输入标签名"
+                           required type="text">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-inline">
+                    <button class="layui-btn" lay-filter="formDemo" lay-submit>立即提交</button>
+                    <button class="layui-btn layui-btn-primary" type="reset">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © luckinstore
+    </div>
+</div>
+<script id="barDemo" type="text/html">
+    <a lay-event="edit"><i class="layui-icon layui-icon-edit" style="font-size: 30px;"></i></a>
+</script>
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <a lay-event="addLabelButton"><i class="layui-icon layui-icon-add-1" style="font-size: 30px;"></i></a>
+    </div>
+</script>
+
+<script>
+    //JavaScript代码区域
+    layui.use('element', function () {
+        var element = layui.element;
+    });
+
+    layui.use('table', function () {
+        var table = layui.table;
+
+        table.render({
+            elem: '#label'
+            , toolbar: '#toolbarDemo'
+            , url: '/label/getLabel'
+            , cols: [
+                [
+                    {field: 'labelName', width: '50%', title: '标签名', align: 'center'}
+                    , {fixed: 'right', title:'操作', toolbar: '#barDemo', width:'50%', align: 'center'}
+                ]
+            ]
+            , page: true
+        });
+
+        table.on('toolbar(label)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch(obj.event){
+                case 'addLabelButton':
+                    layui.use('layer', function() {
+                        var layer = layui.layer;
+                        layer.open({
+                            type: 1,
+                            content: $('#labelBox') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                        });
+                        layui.use('form', function () {
+                            var form = layui.form;
+                            //监听提交
+                            form.on('submit(formDemo)', function (data) {
+                                console.log(JSON.stringify(data.field));
+                                $.ajax({
+                                    url: "/addNewLabel",
+                                    contentType: "application/json;charset=utf-8",
+                                    type: "post",
+                                    dataType: "json",
+                                    data: JSON.stringify(data.field),
+                                    success: function (result) {
+                                        if(result.data == 1){
+                                            layer.msg("添加成功");
+                                            window.location = "/admin/label";
+                                        } else {
+                                            layer.msg("添加失败");
+                                        }
+
+                                    }
+                                });
+                                return false;
+
+                            });
+                        });
+                    });
+            }
+        });
+        table.on('tool(label)', function(obj){
+            var data = obj.data;
+            console.log(data);
+            //console.log(obj)
+            if(obj.event === 'del'){
+                var goods = {
+                    id: data.id,
+                    status: -1
+                };
+                layer.confirm('确认要删除此商品？', function(index){
+                    obj.del();
+                    // $.ajax({
+                    //     url: "/admin/putawayGoods",
+                    //     data: JSON.stringify(goods),
+                    //     type: "post",
+                    //     contentType: "application/json;charset=utf-8",
+                    //     success: function (result) {
+                    //         layer.msg("删除成功");
+                    //     }
+                    // });
+                    layer.close(index);
+                });
+            }else if(obj.event === 'edit'){
+                var id = data.id;
+                console.log(id);
+                layui.use('layer', function(){
+                    var layer = layui.layer;
+                    var index = layer.open({
+                        type: 1,
+                        content: $('#labelBox') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                    });
+                    layui.use('form', function () {
+                        var form = layui.form;
+                        //监听提交
+                        form.on('submit(formDemo)', function (data) {
+                            console.log(JSON.stringify(data.field));
+                            data.field.id = id;
+                            $.ajax({
+                                url: "/updateLabel",
+                                contentType: "application/json;charset=utf-8",
+                                type: "post",
+                                //dataType: "json",
+                                data: JSON.stringify(data.field),
+                                success: function (result) {
+                                    console.log(result);
+                                    if(result.data == 1){
+                                        layer.msg("修改成功!");
+                                        window.location = "/admin/label";
+                                    } else {
+                                        layer.msg("修改失败!");
+                                    }
+                                    layer.close(index);
+                                }
+                            });
+                            return false;
+
+                        });
+                    });
+                });
+            }
+        });
+
+        var $ = layui.$, active = {
+            addLabel: function(){
+                layui.use('layer', function(){
+                    var layer = layui.layer;
+                    layer.open({
+                        type: 1,
+                        content: $('#labelBox') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                    });
+                });
+            }
+        };
+
+        layui.use('form', function () {
+            var form = layui.form;
+
+            //监听提交
+            form.on('submit(formDemo)', function (data) {
+                console.log(JSON.stringify(data.field));
+                $.ajax({
+                    url: "/addNewLabel",
+                    contentType: "application/json;charset=utf-8",
+                    type: "post",
+                    //dataType: "json",
+                    data: JSON.stringify(data.field),
+                    success: function (result) {
+                        console.log(123);
+                        window.location = "/admin/label";
+                    }
+                });
+                return false;
+
+            });
+        });
+
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+
+
+</script>
+</body>
+
+</html>

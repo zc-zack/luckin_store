@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+    <title>后台管理系统</title>
+    <script src="/webjars/jquery/3.4.1/dist/jquery.min.js"></script>
+    <link href="/webjars/layui/2.5.4/css/layui.css" rel="stylesheet">
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">luckinstore后台管理系统</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img class="layui-nav-img" src="http://t.cn/RCzsdCq">
+                    admin
+                </a>
+            </li>
+            <li class="layui-nav-item"><a href="/logOut">退了</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <!--商品管理-->
+                <li class="layui-nav-item">
+                    <a class="">商品</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/goods">所有商品</a></dd>
+                        <dd><a href="/admin/label">管理标签</a></dd>
+                    </dl>
+                </li>
+                <!--会员管理-->
+                <li class="layui-nav-item">
+                    <a class="">会员</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/member">所有会员</a></dd>
+<!--                        <dd><a href="">已注销会员</a></dd>-->
+<!--                        <dd><a href="javascript:;">已封禁会员</a></dd>-->
+                    </dl>
+                </li>
+                <!--订单管理-->
+                <li class="layui-nav-item">
+                    <a class="">订单</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/order">所有订单</a></dd>
+                        <dd><a href="/admin/unfinishedOrder">未完成订单</a></dd>
+                        <dd><a href="/admin/finishedOrder">已完成订单</a></dd>
+                    </dl>
+                </li>
+                <!--积分管理-->
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a class="">积分</a>
+                    <dl class="layui-nav-child">
+                        <dd class="layui-this"><a href="/admin/score">用户积分情况</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body" style="background-color: #f2f2f2">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <div class="layui-card" style="margin-bottom: 10px">
+                <div class="layui-card-header">积分列表</div>
+                <div class="layui-card-body">
+                    <table class="layui-hide" id="score" lay-filter="score"></table>
+                    <script id="barDemo" type="text/html">
+                        <a class="layui-btn layui-btn-xs" lay-event="alter">修改用户积分</a>
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="scoreBox" style="display: none">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">积分</label>
+                <div class="layui-input-inline">
+                    <input autocomplete="off" class="layui-input" lay-verify="required" name="presentScore" placeholder="请输入积分"
+                           required type="text">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-filter="formDemo" lay-submit>立即提交</button>
+                    <button class="layui-btn layui-btn-primary" type="reset">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © luckinstore
+    </div>
+</div>
+<script src="/webjars/layui/2.5.4/layui.all.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use('element', function () {
+        var element = layui.element;
+
+    });
+
+    layui.use('table', function () {
+        var table = layui.table;
+
+        table.render({
+            elem: '#score'
+            , url: '/score/getAllScore'
+            , cols: [
+                [
+                    {field: 'username', width: '25%', height: 80, title: '用户名', align: 'center'}
+                    , {field: 'lastScore', width: '25%', height: 80, title: '上一次积分', align: 'center'}
+                    // , {field: 'behavior', width: 200, title: '变动原因'}
+                    , {field: 'presentScore', title: '当前积分', width: '25%', height: 80, align: 'center'}
+                    , {fixed: 'right', title:'操作', toolbar: '#barDemo', width:'25%', height: 80, align: 'center'}
+                ]
+            ]
+            , page: true
+        });
+
+        table.on('tool(score)', function(obj){
+            var data = obj.data;
+            console.log(data);
+            //console.log(obj)
+            if(obj.event === 'alter'){
+                layui.use('layer', function(){
+                    var layer = layui.layer;
+                    layer.open({
+                        type: 1,
+                        content: $('#scoreBox') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                    });
+                });
+            }
+            layui.use('form', function () {
+                var form = layui.form;
+                //监听提交
+                form.on('submit(formDemo)', function (scoreNum) {
+                    console.log(JSON.stringify(scoreNum.field.presentScore));
+                    var score = {
+                        userId: data.userId,
+                        presentScore: scoreNum.field.presentScore
+                    };
+                    console.log(score);
+                    $.ajax({
+                        url: "/score/alterScore",
+                        contentType: "application/json;charset=utf-8",
+                        type: "post",
+                        dataType: "json",
+                        data: JSON.stringify(score),
+                        success: function (result) {
+                            if (result.data == 1){
+                                console.log(123);
+                                window.location = "/admin/score";
+                            }
+                        }
+                    });
+                    return false;
+                });
+            });
+        });
+
+    });
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>注册页</title>
+    <link rel="stylesheet" href="/webjars/layui/2.5.4/css/layui.css"  media="all">
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="/css/main.css" type="text/css" rel="stylesheet">
+    <script src="/webjars/jquery/3.4.1/dist/jquery.min.js"></script>
+</head>
+<body>
+<div class="site-nav-bg">
+    <div class="site-nav w1200">
+        <p class="sn-back-home">
+            <i class="layui-icon layui-icon-home"></i>
+            <a href="/user/home">首页</a>
+        </p>
+        <div class="sn-quick-menu">
+            <div class="login">
+                <a th:href="@{/login}" th:text="登录" th:if="${user.id==null}" class="text-right"></a>
+                <a th:href="@{/user/information}" th:text="${user.username}" th:if="${user.id!=null}"></a>
+            </div>
+            <div class="sp-cart"><a href="/user/myOrder" class="text-right">我的订单</a></div>
+        </div>
+    </div>
+</div>
+<div>
+    <div class="content content-nav-base  login-content">
+        <div class="login-bg">
+            <div class="login-cont w1200">
+                <div class="form-box" style="top: 70px; height: auto">
+                    <form class="layui-form" action="">
+                        <legend>注册</legend>
+                        <div class="layui-input-inline">
+                            <!-- 用户名 -->
+                            <div class="layui-inline" style="width: 85%">
+                                <input type="text" id="username" name="username" required  lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+                            </div>
+                            <!-- 对号 -->
+                            <div class="layui-inline">
+                                <i class="layui-icon" id="ri" style="color: green;font-weight: bolder;" hidden></i>
+                            </div>
+                            <!-- 错号 -->
+                            <div class="layui-inline">
+                                <i class="layui-icon" id="wr" style="color: red; font-weight: bolder;" hidden>ဆ</i>
+                            </div>
+                        </div>
+
+                        <div class="layui-input-inline">
+                            <!-- 手机号 -->
+                            <div class="layui-inline" style="width: 85%">
+                                <input type="text" id="tele" name="tele" required  lay-verify="required" placeholder="请输入手机号" autocomplete="off" class="layui-input">
+                            </div>
+                            <!-- 对号 -->
+                            <div class="layui-inline">
+                                <i class="layui-icon" id="teleri" style="color: green;font-weight: bolder;" hidden></i>
+                            </div>
+                            <!-- 错号 -->
+                            <div class="layui-inline">
+                                <i class="layui-icon" id="telewr" style="color: red; font-weight: bolder;" hidden>ဆ</i>
+                            </div>
+                        </div>
+                        <div class="layui-input-inline">
+                            <!-- 用户名 -->
+                            <div class="layui-inline" style="width: 85%">
+                                <input type="radio" name="sex" value="1" title="男" checked>
+                                <input type="radio" name="sex" value="0" title="女">
+                            </div>
+                        </div>
+                        <!-- 密码 -->
+                        <div class="layui-input-inline">
+                            <div class="layui-inline" style="width: 85%">
+                                <input type="password" id="password" name="password" required  lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">
+                            </div>
+                            <!-- 对号 -->
+                            <div class="layui-inline">
+                                <i class="layui-icon" id="pri" style="color: green;font-weight: bolder;" hidden></i>
+                            </div>
+                            <!-- 错号 -->
+                            <div class="layui-inline">
+                                <i class="layui-icon" id="pwr" style="color: red; font-weight: bolder;" hidden>ဆ</i>
+                            </div>
+                        </div>
+                        <!-- 确认密码 -->
+                        <div class="layui-input-inline">
+                            <div class="layui-inline" style="width: 85%">
+                                <input type="password" id="rePassword" name="rePassword" required  lay-verify="required" placeholder="请确认密码" autocomplete="off" class="layui-input">
+                            </div>
+                            <!-- 对号 -->
+                            <div class="layui-inline">
+                                <i class="layui-icon" id="rpri" style="color: green;font-weight: bolder;" hidden></i>
+                            </div>
+                            <!-- 错号 -->
+                            <div class="layui-inline">
+                                <i class="layui-icon" id="rpwr" style="color: red; font-weight: bolder;" hidden>ဆ</i>
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item login-btn" >
+                            <div class="layui-input-block">
+                                <button type="submit" lay-submit lay-filter="formDemo" class="layui-btn" style="background: #009688">注册</button>
+                            </div>
+                        </div>
+                        <hr style="width: 85%" />
+                        <p style="width: 85%"><a href="/login" class="fl">已有账号？立即登录</a><a href="javascript:;" class="fr">忘记密码？</a></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="/webjars/layui/2.5.4/layui.js"></script>
+<script>
+    layui.use('form', function(){
+        var form = layui.form;
+        var flag = 1;
+        //验证用户名
+        $('#username').blur(function () {
+            var username = $('#username').val();
+            console.log(username);
+            if(username == "" || username == null){
+                flag = 0;
+                $('#wr').removeAttr('hidden');
+                $('#ri').attr('hidden','hidden');
+                layer.msg("用户名不能为空");
+                return 0;
+            }
+            var data = {username: username};
+            $.ajax({
+                url: "/checkUsername",
+                data: username,
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                success: function (result) {
+                    console.log("result:" + result.data);
+                    if (result.data == 1) {
+                        console.log(result);
+                        flag = 1;
+                        $('#ri').removeAttr('hidden');
+                        $('#wr').attr('hidden','hidden');
+                    } else {
+                        $('#wr').removeAttr('hidden');
+                        $('#ri').attr('hidden','hidden');
+                        console.log(result.msg);
+                        layer.msg("用户名已被注册");
+                        flag = 0;
+                    }
+                    console.log(flag);
+                }
+            });
+        });
+
+        //验证手机号
+        $('#tele').blur(function () {
+            var tele = $('#tele').val();
+            if (tele != '') {
+                console.log("in");
+                flag = 1;
+                $('#teleri').removeAttr('hidden');
+                $('#telewr').attr('hidden','hidden');
+            } else {
+                $('#telewr').removeAttr('hidden');
+                $('#teleri').attr('hidden','hidden');
+                layer.msg('手机号不能为空! ');
+                flag = 0;
+            }
+        });
+
+        //验证密码是否为空
+        $('#rePassword').blur(function() {
+            if($('#password').val() != $('#rePassword').val()){
+                $('#rpwr').removeAttr('hidden');
+                $('#rpri').attr('hidden','hidden');
+                layer.msg('两次输入密码不一致!');
+                flag = 0;
+            }else {
+                $('#rpri').removeAttr('hidden');
+                $('#rpwr').attr('hidden','hidden');
+                flag = 1;
+            }
+        });
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            console.log(data.field);
+            $.ajax({
+                url: "/addUser",
+                type: "post",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(data.field),
+                success: function (result) {
+                    if(result.code == 1){
+                        layer.msg("注册成功");
+                        setTimeout("window.location.href='/login'", 1000);
+                    }else {
+                        layer.msg(result.msg);
+                        console.log(result.msg);
+                        return false;
+                    }
+                    console.log(result);
+                }
+            });
+            return false;
+        });
+    });
+
+
+
+    function register() {
+        var username = $('#username').val();
+        var password = $('#password').val();
+        var rePassword = $('#rePassword').val();
+        console.log(username);
+        var data = {
+            username: username,
+            password: password
+        };
+        if (flag === 0) {
+            alert("用户名已被注册");
+        } else if (password != rePassword) {
+            alert("输入的两次密码不一致");
+        } else {
+            $.ajax({
+                url: "/addUser",
+                type: "post",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(data),
+                success: function (result) {
+                    console.log(result);
+                }
+            });
+        }
+
+
+    }
+</script>
+<style>
+    .login-content .login-bg{
+        background: url(/img/2.png)
+    }
+</style>
+</html>

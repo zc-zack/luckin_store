@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+    <title>后台管理系统</title>
+    <script src="/webjars/jquery/3.4.1/dist/jquery.min.js"></script>
+    <link href="/webjars/layui/2.5.4/css/layui.css" rel="stylesheet">
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">luckinstore后台管理系统</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img class="layui-nav-img" src="http://t.cn/RCzsdCq">
+                    admin
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">基本资料</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="/logOut">退了</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <!--商品管理-->
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a class="">商品</a>
+                    <dl class="layui-nav-child">
+                        <dd class="layui-this"><a href="/admin/goods">所有商品</a></dd>
+<!--                        <dd><a href="/admin/putGoods">已下架商品</a></dd>-->
+                        <dd><a href="/admin/label">管理标签</a></dd>
+                    </dl>
+                </li>
+                <!--会员管理-->
+                <li class="layui-nav-item">
+                    <a class="">会员</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/member">所有会员</a></dd>
+<!--                        <dd><a href="/admin/deletedGoods">已注销会员</a></dd>-->
+<!--                        <dd><a href="javascript:;">已封禁会员</a></dd>-->
+                    </dl>
+                </li>
+                <!--订单管理-->
+                <li class="layui-nav-item">
+                    <a class="">订单</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/order">所有订单</a></dd>
+                        <dd><a href="/admin/unfinishedOrder">未完成订单</a></dd>
+                        <dd><a href="/admin/finishedOrder">已完成订单</a></dd>
+                    </dl>
+                </li>
+                <!--积分管理-->
+                <li class="layui-nav-item">
+                    <a class="">积分</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/admin/score">用户积分情况</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body" style="background-color: #f2f2f2">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <div class="layui-card">
+                <div class="layui-card-header">商品列表</div>
+                <div class="layui-card-body">
+                    <div class="demoTable">
+                    搜索商品名：
+                    <div class="layui-inline">
+                        <input class="layui-input" name="goodsName" id="demoReload" autocomplete="off">
+                    </div>
+                    <button class="layui-btn" data-type="reload">搜索</button>
+                </div>
+                        <table class="layui-hide" id="goods" lay-filter="goods" style="z-index: 99999999999"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="goodsBox" style="display: none">
+        <form class="layui-form" action="">
+            <div class="layui-form-item" hidden>
+                <label class="layui-form-label">商品ID</label>
+                <div class="layui-input-inline">
+                    <input autocomplete="off" class="layui-input" id="id" name="id" placeholder="请输入标签名"
+                           required type="text">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">商品名称</label>
+                <div class="layui-input-inline">
+                    <input autocomplete="off" class="layui-input" lay-verify="required" id="goodsName" name="goodsName" placeholder="请输入商品名"
+                           required type="text">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-inline">
+                    <div class="layui-upload" style="margin-left: 110px">
+                        <div class="layui-upload-list">
+                            <img class="layui-upload-img" id="imgUrl" name="imgUrl" style="height: 100px;width: 100px">
+                            <p id="demoText"></p>
+                        </div>
+                        <button type="button" class="layui-btn" id="test1">上传图片</button>
+                    </div>
+                    <input type="text" id="image" name="image" hidden>
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">商品描述</label>
+                <div class="layui-input-inline">
+                    <textarea class="layui-textarea" name="description" id="description" placeholder="请输入商品描述"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">商品价格</label>
+                <div class="layui-input-inline">
+                    <input autocomplete="off" class="layui-input" lay-verify="required" id="price" name="price" placeholder="请输入商品价格"
+                           required type="text">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">商品数量</label>
+                <div class="layui-input-inline">
+                    <input autocomplete="off" class="layui-input" lay-verify="required" id="amount" name="amount" placeholder="请输入商品数量"
+                           required type="text">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">商品类别</label>
+                <div class="layui-input-inline">
+                    <select name="labelId" lay-verify="required">
+                        <option value=""></option>
+                        <div th:each="label:${labelList}">
+                            <option th:value="${label.id}" th:text="${label.labelName}"></option>
+                        </div>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-filter="formDemo" lay-submit>提交</button>
+                    <button class="layui-btn layui-btn-primary" type="reset">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © luckinstore
+    </div>
+</div>
+<script src="/webjars/layui/2.5.4/layui.js"></script>
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <a lay-event="addGoodsButton"><i class="layui-icon layui-icon-add-1" style="font-size: 30px;"></i></a>
+    </div>
+</script>
+<script id="barDemo" type="text/html">
+    <a lay-event="edit"><i class="layui-icon layui-icon-edit" style="font-size: 30px;"></i></a>
+</script>
+<script id="goodsStatus" type="text/html">
+    {{#  if(d.status == 1){ }}
+    <a lay-event="out"><i class="layui-icon layui-icon-upload-circle" style="font-size: 25px;"></i></a>
+    {{#  } else { }}
+    <a lay-event="put"><i class="layui-icon layui-icon-close-fill" style="font-size: 30px;"></i></a>
+    {{#  }}}
+</script>
+<script>
+    var imgUrl;
+    //JavaScript代码区域
+    layui.use('element', function () {
+        var element = layui.element;
+    });
+    layui.use('table', function () {
+        var table = layui.table;
+        table.render({
+            elem: '#goods'
+            , toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+            , url: '/goods/getAllGoods'
+            ,where: {
+                goodsName:""
+            }
+            , cols: [
+                [
+                    {field: 'goodsName', title: '商品名', align: 'center'}
+                    , {field: 'price',  title: '价格', sort: true, align: 'center'}
+                    , {field: 'image', title: '商品图', templet: '<div><img src="{{d.image}}"></div>', align: 'center'}
+                    , {field: 'description', title: '商品描述', align: 'center'}
+                    , {field: 'labelName', title: '商品分类', align: 'center'}
+                    , {field: 'amount', title: '商品数量',  align: 'center'}
+                    , {field: 'hot', title: '商品热度',  align: 'center'}
+                    , { title: '状态', toolbar: '#goodsStatus', align: 'center'}
+                    , {title:'操作', toolbar: '#barDemo',  align: 'center'}
+                ]
+            ]
+            , page: true
+            ,id: 'goodsTable'
+        });
+        var $ = layui.$, active = {
+            reload: function(){
+                var demoReload = $('#demoReload');
+                //执行重载
+                table.reload('goodsTable', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        goodsName:demoReload.val()
+                    }
+                }, 'data');
+            }
+        };
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        //添加商品
+        table.on('toolbar(goods)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch(obj.event){
+                case 'addGoodsButton':
+                    layui.use('layer', function() {
+                        var layer = layui.layer;
+                        layer.open({
+                            type: 1,
+                            content: $('#goodsBox') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                        });
+                        layui.use('form', function () {
+                            var form = layui.form;
+                            //监听提交
+                            form.on('submit(formDemo)', function (data) {
+                                console.log(JSON.stringify(data.field));
+                                $.ajax({
+                                    url: "/goods/addNewGoods",
+                                    contentType: "application/json;charset=utf-8",
+                                    type: "post",
+                                    //dataType: "json",
+                                    data: JSON.stringify(data.field),
+                                    success: function (result) {
+                                        layer.msg("添加商品成功");
+                                        window.location = "/admin/goods";
+                                    }
+                                });
+                            });
+                        });
+                    });
+            }
+        });
+        table.on('tool(goods)', function(obj){
+            var data = obj.data;
+            console.log(data);
+            //console.log(obj)
+            if(obj.event === 'out'){
+                var goods = {
+                  id: data.id,
+                  status: 0
+                };
+                layer.confirm('确认下架此商品？', function(index){
+                    $.ajax({
+                        url: "/goods/updateStatus",
+                        data: JSON.stringify(goods),
+                        type: "post",
+                        contentType: "application/json;charset=utf-8",
+                        success: function (result) {
+                            layer.msg("下架成功");
+                            table.reload('goodsTable');
+                        }
+                    });
+                    layer.close(index);
+                });
+            }else if(obj.event === 'put'){
+                var goods = {
+                    id: data.id,
+                    status: 1
+                };
+                layer.confirm('确认上架此商品？', function(index){
+                    $.ajax({
+                        url: "/goods/updateStatus",
+                        data: JSON.stringify(goods),
+                        type: "post",
+                        dataType: "json",
+                        contentType: "application/json;charset=utf-8",
+                        success: function (result) {
+                            if(result.data == 1){
+                                layer.msg("上架成功");
+                                table.reload('goodsTable');
+                            } else {
+                              layer.msg("上架失败");
+                            }
+                        }
+                    });
+                    layer.close(index);
+                });
+
+            } else if(obj.event === 'edit'){
+                var id = data.id;
+                $('#id').val(data.id);
+                $('#goodsName').val(data.goodsName);
+                $('#price').val(data.price);
+                $('#description').val(data.description);
+                $('#amount').val(data.amount);
+                $('#image').val(data.image);
+                $('#imgUrl').attr('src', data.image);
+                console.log(id);
+                layui.use('layer', function(){
+                    var layer = layui.layer;
+                    layer.open({
+                        type: 1,
+                        content: $('#goodsBox') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                    });
+                    layui.use('form', function () {
+                        var form = layui.form;
+                        //监听提交
+                        form.on('submit(formDemo)', function (data) {
+                            console.log(JSON.stringify(data.field));
+                            $.ajax({
+                                url: "/goods/alterGoods",
+                                contentType: "application/json;charset=utf-8",
+                                type: "post",
+                                dataType: "json",
+                                data: JSON.stringify(data.field),
+                                success: function (result) {
+                                    if(result.data == 1){
+                                        layer.msg("修改商品信息成功！");
+                                        window.location = "/admin/goods";
+                                    } else {
+                                        layer.msg("修改商品信息失败");
+                                    }
+                                }
+                            });
+                            return false;
+                        });
+                        return false;
+                    });
+                });
+            }else if(obj.event === 'del'){
+                var goods = {
+                    id: data.id,
+                    status: -1
+                };
+                layer.confirm('确认要删除此商品？', function(index){
+                    obj.del();
+                    $.ajax({
+                        url: "/admin/putawayGoods",
+                        data: JSON.stringify(goods),
+                        type: "post",
+                        contentType: "application/json;charset=utf-8",
+                        success: function (result) {
+                            layer.msg("删除成功");
+                        }
+                    });
+                    layer.close(index);
+                });
+            }
+        });
+    });
+    layui.use('upload', function() {
+        var $ = layui.jquery
+            , upload = layui.upload;
+
+        //普通图片上传
+        var uploadInst = upload.render({
+            elem: '#test1',
+            url: '/uploadImage',
+            auto: true,
+            //,multiple: true
+            bindAction: '#upload',
+            before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#imgUrl').attr('src', result); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                console.log(res.data.src);
+                if (res.code > 0) {
+                    return layer.msg('上传失败');
+                }else {
+                    $('#image').val( res.data.src) ;
+                }
+                //上传成功
+            }
+            , error: function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#demoText');
+                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                demoText.find('.demo-reload').on('click', function () {
+                    uploadInst.upload();
+                });
+            }
+        });
+    });
+</script>
+
+</body>
+<style>
+    .layui-table-cell {
+        height: 100%;
+        max-width: 100%;
+    }
+</style>
+</html>

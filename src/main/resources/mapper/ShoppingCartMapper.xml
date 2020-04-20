@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lucky.luckinstore.mapper.ShoppingCartMapper">
+    <resultMap id="BaseResultMap" type="com.lucky.luckinstore.pojo.entity.ShoppingCart">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="goods_id" jdbcType="INTEGER" property="goodsId"/>
+        <result column="deleted" jdbcType="BIT" property="deleted"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="creator" jdbcType="INTEGER" property="creator"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modifier" jdbcType="INTEGER" property="modifier"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="present_score" jdbcType="TIMESTAMP" property="presentScore"/>
+    </resultMap>
+
+    <!--添加商品到购物车-->
+    <insert id="insertGoodsIntoCart" parameterType="com.lucky.luckinstore.pojo.dto.ShoppingCartDTO">
+        insert into t_shopping_cart
+        set
+            user_id = #{userId},
+            goods_id = #{goodsId},
+            num = #{num},
+            creator = #{userId},
+            modifier = #{userId},
+            create_time = now(),
+            modify_time = now()
+    </insert>
+
+    <select id="selectCartByUserId" parameterType="Integer" resultType="com.lucky.luckinstore.pojo.dto.ShoppingCartDTO">
+        select
+            t_shopping_cart.id,
+            t_shopping_cart.goods_id,
+            t_shopping_cart.num,
+            t_goods.goods_name,
+            t_goods.price,
+            t_goods.image
+        from
+            t_shopping_cart
+        inner join t_goods on t_shopping_cart.goods_id = t_goods.id
+        where user_id = #{userId} and deleted = 0;
+    </select>
+
+    <!--更新购物商品的状态-->
+    <update id="updateCartDeletedById" parameterType="java.util.ArrayList">
+        <foreach collection="list" item="cart" index="index" open="" close="" separator=";">
+            update t_shopping_cart
+            <set>
+                amount = amount - #{num}
+            </set>
+            <where>
+                id = #{goods.id}
+            </where>
+        </foreach>
+    </update>
+
+    <!--更新购物车的状态，即删除购物车的商品-->
+    <update id="updateDeletedById" parameterType="Integer">
+        update
+            t_shopping_cart
+        set
+            deleted = 1
+        where
+            id = #{cartId}
+    </update>
+    <!--查找购物车中是否有这个商品-->
+    <select id="selectIdByGoodsIdAndUserId" resultType="Integer">
+        select id from t_shopping_cart where goods_id = #{goodsId} and user_id = #{userId}
+    </select>
+    <!--添加购物车-->
+    <update id="updateNumById" parameterType="Integer">
+        update t_shopping_cart set num = num + #{num} where id = #{id}
+    </update>
+</mapper>

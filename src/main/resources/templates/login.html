@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>登录页</title>
+    <link href="/webjars/layui/2.5.4/css/layui.css" rel="stylesheet">
+    <link href="/css/main.css" type="text/css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/webjars/jquery/3.4.1/dist/jquery.min.js"></script>
+</head>
+<body class="layui-layout-body">
+<div class="site-nav-bg">
+    <div class="site-nav w1200">
+        <p class="sn-back-home">
+            <i class="layui-icon layui-icon-home"></i>
+            <a href="/user/home">首页</a>
+        </p>
+        <div class="sn-quick-menu">
+            <div class="login">
+                <a th:href="@{/login}"  class="text-right">登录</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <div class="content content-nav-base  login-content">
+        <div class="login-bg">
+            <div class="login-cont w1200">
+                <div class="form-box">
+                    <form class="layui-form" action="">
+                        <legend>登录</legend>
+                        <div class="layui-form-item">
+                            <div class="layui-input-inline">
+                                <input type="text" id="username" name="username" required lay-verify="required" placeholder="用户名" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                            <div class="layui-input-inline" style="margin-top: 20px">
+                                <input type="password" name="password" id="password" required lay-verify="required" placeholder="密码" autocomplete="off"
+                                       class="layui-input" style="width: 100%">
+                            </div>
+                        </div>
+                        <div class="layui-form-item login-btn" >
+                            <div class="layui-input-block">
+                                <button lay-submit lay-filter="login" class="layui-btn" style="background: #009688">登录</button>
+                            </div>
+                        </div>
+                        <hr/>
+                        <p><a href="/register" class="fl">立即注册</a><a href="javascript:;" class="fr">忘记密码？</a></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="/webjars/layui/2.5.4/layui.all.js"></script>
+<script>
+    layui.use('element', function () {
+        var element = layui.element;
+
+    });
+    layui.use('form', function () {
+        var form = layui.form;
+        //监听提交
+        form.on('submit(login)', function (data) {
+            console.log(JSON.stringify(data.field));
+            $.ajax({
+                url: "/checkPassword",
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(data.field),
+                success: function (result) {
+                    if (result.code == 1) {
+                        console.log(result.data);
+                        if (result.data == 0){
+                            window.location = "/user/home";
+                        }else{
+                            window.location = "/admin/home";
+                        }
+                    }else{
+                        layer.msg(result.msg);
+                    }
+                }
+            });
+            return false;
+        });
+        return false;
+    });
+</script>
+<style>
+    .login-content .login-bg{
+        background: url(/img/lucky2.png)
+    }
+</style>
+</html>

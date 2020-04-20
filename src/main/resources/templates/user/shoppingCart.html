@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <title>购物车</title>
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/main.css" type="text/css" rel="stylesheet">
+    <link rel="stylesheet" href="/webjars/layui/2.5.4/css/layui.css"  media="all">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+<div class="site-nav-bg">
+    <div class="site-nav w1200">
+        <p class="sn-back-home">
+            <i class="layui-icon layui-icon-home"></i>
+            <a href="/user/home">首页</a>
+        </p>
+        <div class="sn-quick-menu">
+            <div class="login">
+                <a th:href="@{/login}" th:text="登录" th:if="${user.id==null}" class="text-right"></a>
+                <a th:href="@{/user/information}" th:text="${user.username}" th:if="${user.id!=null}"></a>
+            </div>
+            <div class="sp-cart"><a href="/user/myOrder" class="text-right">我的订单</a></div>
+            <div class="sp-cart" style="margin-left: 10px"><a href="/user/shoppingCart">购物车</a><span></span></div>
+            <div class="sp-cart"><a href="/logOut" class="text-right" th:if="${user.id!=null}">退出登录</a></div>
+        </div>
+    </div>
+</div>
+<!--最外层的布局容器-->
+<div class="container" style="margin-top: 15px">
+    <div class="row">
+        <div class="col-md-12" >
+                <table class="layui-hide" id="cart" lay-filter="cart"></table>
+                <div class="layui-btn-group demoTable">
+                    <button class="layui-btn" data-type="getCheckData" type="button">去付款</button>
+                </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script src="/webjars/layui/2.5.4/layui.js"></script>
+<script id="barDemo" type="text/html">
+    <a lay-event="del"><i class="layui-icon layui-icon-delete" style="font-size: 30px;"></i></a>
+</script>
+<script th:inline="javascript">
+    layui.use('form', function(){
+        var form = layui.form;
+        form.on('checkbox(checkAll)', function (data) {
+            $("input[name='cartId']").each(function () {
+                this.checked = data.elem.checked;
+            });
+            form.render('checkbox');
+        });
+        form.on('checkbox(checkBox)', function(data){
+            console.log(data.value); //复选框value值，也可以通过data.elem.value得到
+            console.log($('#'+'num'+data.value).val());
+        });
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            layer.msg(JSON.stringify(data.field));
+            console.log(JSON.stringify(data.field));
+            return false;
+        });
+    });
+</script>
+<script>
+    layui.use('element', function () {
+        var element = layui.element;
+    });
+    layui.use('table', function () {
+        var table = layui.table;
+        table.render({
+            elem: '#cart'
+            , url: '/shoppingCart/getAllCart'
+            ,where: {
+                goodsName:""
+            }
+            , cols: [
+                [
+                    {type:'checkbox'}
+                    , {field: 'goodsName', title: '商品', align: 'center'}
+                    , {field: 'image',  title: '商品图', templet: '<div><img src="{{d.image}}"></div>', align: 'center'}
+                    , {field: 'price',  title: '价格', align: 'center'}
+                    , {field: 'num', title: '数量', align: 'center'}
+                    , {fixed: 'right', title:'操作', toolbar: '#barDemo', align: 'center'}
+                ]
+            ]
+            , page: true
+            ,id: 'cartTable'
+        });
+        //监听表格复选框选择
+        table.on('checkbox(demo)', function(obj){
+            console.log(obj)
+        });
+        //监听工具条
+        table.on('tool(cart)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'detail'){
+                layer.msg('ID：'+ data.id + ' 的查看操作');
+            } else if(obj.event === 'del'){
+                layer.confirm('要从购物车删除此商品吗？', function(index){
+                    console.log(data.id);
+                    var jsonData = {id: data.id};
+                    $.ajax({
+                        url: "/shoppingCart/deleteCart",
+                        type: "post",
+                        dataType:"json",
+                        contentType: "application/json;charset=utf-8",
+                        data: JSON.stringify(jsonData),
+                        success: function (result) {
+                            if(result.data == 1){
+                                obj.del();
+                                layer.close(index);
+                                layer.msg("删除成功！");
+                            }else {
+                                layer.msg("删除失败！");
+                            }
+                        }
+                    });
+
+
+                });
+            }
+        });
+
+        var $ = layui.$, active = {
+            getCheckData: function(){ //获取选中数据
+                var checkStatus = table.checkStatus('cartTable')
+                    ,data = checkStatus.data;
+                var goodsData = {
+                    goodsList: JSON.stringify(data)
+                };
+                $('#goodsList').val(JSON.stringify(data));
+                $.ajax({
+                    url: "/shoppingCart/addOrder",
+                    type: "post",
+                    async: false,
+                    contentType: "application/json;charset=utf-8",
+                    data: JSON.stringify(data),
+                    success:function (result) {
+                        if(result.data == 1){
+                            window.location = "/user/order";
+                        }
+                    }
+                });
+            }
+        };
+
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+</script>
+<style>
+    .layui-table-cell {
+        height: 100%;
+        max-width: 100%;
+    }
+</style>
+</html>
